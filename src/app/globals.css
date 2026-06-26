@@ -1,0 +1,338 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2563eb;
+  --color-primary-light: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+  --color-surface: #ffffff;
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    min-height: 100dvh;
+  }
+
+  /* Modern portfolio scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(37, 99, 235, 0.45) rgba(255, 255, 255, 0.15);
+  }
+
+  *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3b82f6, #2563eb);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #60a5fa, #3b82f6);
+    background-clip: padding-box;
+  }
+
+  ::selection {
+    background: rgba(37, 99, 235, 0.2);
+    color: var(--color-text);
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow:
+      0 8px 32px rgba(37, 99, 235, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+      0 12px 40px rgba(37, 99, 235, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+
+  .glass-flat {
+    background: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow: none;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .section-padding {
+    @apply px-4 py-16 sm:px-6 lg:px-8 lg:py-24;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bg-orb {
+    filter: blur(80px);
+    will-change: transform;
+  }
+
+  .bg-orb-blue {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.45) 0%, rgba(59, 130, 246, 0) 70%);
+  }
+
+  .bg-orb-red {
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.38) 0%, rgba(239, 68, 68, 0) 70%);
+  }
+
+  .bg-orb-green {
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, rgba(34, 197, 94, 0) 70%);
+  }
+
+  .bg-orb-yellow {
+    background: radial-gradient(circle, rgba(234, 179, 8, 0.35) 0%, rgba(234, 179, 8, 0) 70%);
+  }
+
+  .bg-orb-orange {
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.36) 0%, rgba(249, 115, 22, 0) 70%);
+  }
+}
+
+@keyframes orb-float-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(3%, -4%) scale(1.06);
+  }
+}
+
+@keyframes orb-float-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-4%, 3%) scale(1.08);
+  }
+}
+
+.animate-orb-a {
+  animation: orb-float-a 22s ease-in-out infinite;
+}
+
+.animate-orb-b {
+  animation: orb-float-b 26s ease-in-out infinite;
+}
+
+.animate-orb-c {
+  animation: orb-float-a 30s ease-in-out infinite reverse;
+}
+
+/* Flock of birds — murmuration-style paths */
+.flock-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.flock-group {
+  position: absolute;
+  opacity: 0.85;
+  will-change: transform;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.flock-bird {
+  animation: bird-flap 2.8s ease-in-out infinite;
+}
+
+.flock-dot {
+  animation: dot-drift linear infinite;
+}
+
+@keyframes bird-flap {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.82);
+  }
+}
+
+@keyframes dot-drift {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-120vw, 40px);
+    opacity: 0.2;
+  }
+}
+
+@keyframes flock-path-a-keyframes {
+  0% {
+    transform: translate(110vw, 12vh) rotate(-5deg);
+  }
+  25% {
+    transform: translate(55vw, 6vh) rotate(8deg);
+  }
+  50% {
+    transform: translate(10vw, 18vh) rotate(-3deg);
+  }
+  75% {
+    transform: translate(-30vw, 10vh) rotate(6deg);
+  }
+  100% {
+    transform: translate(-120vw, 22vh) rotate(-4deg);
+  }
+}
+
+@keyframes flock-path-b-keyframes {
+  0% {
+    transform: translate(105vw, 35vh) rotate(4deg);
+  }
+  30% {
+    transform: translate(50vw, 28vh) rotate(-10deg);
+  }
+  60% {
+    transform: translate(5vw, 38vh) rotate(5deg);
+  }
+  100% {
+    transform: translate(-115vw, 30vh) rotate(-6deg);
+  }
+}
+
+@keyframes flock-path-c-keyframes {
+  0% {
+    transform: translate(115vw, 55vh) rotate(-8deg);
+  }
+  35% {
+    transform: translate(60vw, 48vh) rotate(12deg);
+  }
+  70% {
+    transform: translate(15vw, 58vh) rotate(-5deg);
+  }
+  100% {
+    transform: translate(-125vw, 50vh) rotate(7deg);
+  }
+}
+
+@keyframes flock-path-d-keyframes {
+  0% {
+    transform: translate(100vw, 72vh) rotate(6deg);
+  }
+  40% {
+    transform: translate(45vw, 65vh) rotate(-8deg);
+  }
+  100% {
+    transform: translate(-110vw, 70vh) rotate(4deg);
+  }
+}
+
+@keyframes flock-path-e-keyframes {
+  0% {
+    transform: translate(108vw, 22vh) rotate(-12deg);
+  }
+  50% {
+    transform: translate(30vw, 32vh) rotate(15deg);
+  }
+  100% {
+    transform: translate(-118vw, 18vh) rotate(-7deg);
+  }
+}
+
+@keyframes flock-path-f-keyframes {
+  0% {
+    transform: translate(112vw, 82vh) rotate(3deg);
+  }
+  45% {
+    transform: translate(40vw, 75vh) rotate(-14deg);
+  }
+  100% {
+    transform: translate(-122vw, 85vh) rotate(5deg);
+  }
+}
+
+.flock-path-a {
+  animation-name: flock-path-a-keyframes;
+}
+.flock-path-b {
+  animation-name: flock-path-b-keyframes;
+}
+.flock-path-c {
+  animation-name: flock-path-c-keyframes;
+}
+.flock-path-d {
+  animation-name: flock-path-d-keyframes;
+}
+.flock-path-e {
+  animation-name: flock-path-e-keyframes;
+}
+.flock-path-f {
+  animation-name: flock-path-f-keyframes;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

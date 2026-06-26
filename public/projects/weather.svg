@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" fill="none">
+  <rect width="800" height="500" fill="#f5f5f7"/>
+  <circle cx="400" cy="220" r="100" fill="#5856d6" opacity="0.15"/>
+  <circle cx="400" cy="220" r="60" fill="#5856d6" opacity="0.25"/>
+  <text x="400" y="420" text-anchor="middle" fill="#86868b" font-family="system-ui,sans-serif" font-size="18">Weather</text>
+</svg>
