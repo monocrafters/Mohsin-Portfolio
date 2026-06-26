@@ -1,5 +1,6 @@
 import { ObjectId, type WithId } from "mongodb";
 import { getDb, isMongoConnectionError } from "@/lib/mongodb";
+import { resolveProjectLinks, sanitizeLinkForDb } from "@/lib/project-links";
 
 export type Project = {
   title: string;
@@ -59,16 +60,28 @@ const SEED_PROJECTS: Project[] = [
 ];
 
 function serializeProject(doc: ProjectDoc) {
+  const resolved = resolveProjectLinks(doc.link, doc.github);
   return {
     id: doc._id.toString(),
     title: doc.title,
     description: doc.description,
     tags: doc.tags,
-    link: doc.link,
-    github: doc.github,
+    link: sanitizeLinkForDb(resolved.live),
+    github: sanitizeLinkForDb(resolved.github),
     year: doc.year,
     color: doc.color,
     image: doc.image || "",
+  };
+}
+
+export function normalizeProjectInput(data: {
+  link?: string;
+  github?: string;
+}) {
+  const resolved = resolveProjectLinks(data.link, data.github);
+  return {
+    link: sanitizeLinkForDb(resolved.live),
+    github: sanitizeLinkForDb(resolved.github),
   };
 }
 
@@ -81,16 +94,15 @@ export function validateProjectPayload(body: {
 }) {
   const title = String(body.title || "").trim();
   const description = String(body.description || "").trim();
-  const link = String(body.link || "#").trim();
-  const github = String(body.github || "#").trim();
   const image = String(body.image || "").trim();
+  const resolved = resolveProjectLinks(body.link, body.github);
 
   if (!title || !description) {
     return { error: "Title and description required." as const };
   }
 
-  const hasLink = link && link !== "#";
-  const hasGithub = github && github !== "#";
+  const hasLink = Boolean(resolved.live);
+  const hasGithub = Boolean(resolved.github);
   const hasImage = image.length > 0;
 
   if (!hasLink && !hasGithub && !hasImage) {
@@ -100,7 +112,13 @@ export function validateProjectPayload(body: {
   }
 
   return {
-    data: { title, description, link: link || "#", github: github || "#", image: image || undefined },
+    data: {
+      title,
+      description,
+      link: sanitizeLinkForDb(resolved.live),
+      github: sanitizeLinkForDb(resolved.github),
+      image: image || undefined,
+    },
   };
 }
 
