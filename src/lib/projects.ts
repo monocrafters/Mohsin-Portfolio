@@ -101,16 +101,6 @@ export function validateProjectPayload(body: {
     return { error: "Title and description required." as const };
   }
 
-  const hasLink = Boolean(resolved.live);
-  const hasGithub = Boolean(resolved.github);
-  const hasImage = image.length > 0;
-
-  if (!hasLink && !hasGithub && !hasImage) {
-    return {
-      error: "Add a live URL, cover image, or GitHub/source link." as const,
-    };
-  }
-
   return {
     data: {
       title,

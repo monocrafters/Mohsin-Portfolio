@@ -1,10 +1,31 @@
 import { NextResponse } from "next/server";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { requireAdminSession } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 const MAX_BYTES = 2 * 1024 * 1024;
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+
+function mimeFromExtension(ext: string): string | null {
+  const map: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    gif: "image/gif",
+  };
+  return map[ext] ?? null;
+}
+
+function resolveMime(file: File): string | null {
+  if (file.type && ALLOWED.has(file.type)) return file.type;
+
+  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+  const fromExt = mimeFromExtension(ext);
+  if (fromExt) return fromExt;
+
+  return null;
+}
 
 export async function POST(request: Request) {
   const session = await requireAdminSession();
@@ -20,7 +41,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No image file provided." }, { status: 400 });
     }
 
-    if (!ALLOWED.has(file.type)) {
+    const mime = resolveMime(file);
+    if (!mime) {
       return NextResponse.json({ error: "Only JPG, PNG, WebP or GIF allowed." }, { status: 400 });
     }
 
@@ -28,16 +50,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Image must be under 2 MB." }, { status: 400 });
     }
 
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const safeExt = ["jpg", "jpeg", "png", "webp", "gif"].includes(ext) ? ext : "jpg";
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${safeExt}`;
-    const dir = path.join(process.cwd(), "public", "uploads", "projects");
-
-    await mkdir(dir, { recursive: true });
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(dir, filename), buffer);
+    const base64 = buffer.toString("base64");
+    const url = `data:${mime};base64,${base64}`;
 
-    return NextResponse.json({ url: `/uploads/projects/${filename}` });
+    return NextResponse.json({ url });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ error: "Upload failed." }, { status: 500 });

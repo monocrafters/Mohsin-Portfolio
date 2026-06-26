@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ProjectItem } from "@/components/ui/ProjectCard";
+import { adminFetch } from "@/lib/admin-fetch";
 
 const COLORS = ["#2563eb", "#16a34a", "#7c3aed", "#ea580c", "#0891b2", "#db2777"];
 
@@ -29,7 +30,7 @@ export default function ProjectManager() {
   async function loadProjects() {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/projects");
+      const res = await adminFetch("/api/admin/projects");
       const data = await res.json();
       if (res.ok) setProjects(data.projects || []);
       else setError(data.error || "Failed to load");
@@ -70,7 +71,7 @@ export default function ProjectManager() {
     try {
       const body = new FormData();
       body.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const res = await adminFetch("/api/admin/upload", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Upload failed.");
@@ -98,14 +99,12 @@ export default function ProjectManager() {
 
     try {
       const res = editId
-        ? await fetch(`/api/admin/projects/${editId}`, {
+        ? await adminFetch(`/api/admin/projects/${editId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           })
-        : await fetch("/api/admin/projects", {
+        : await adminFetch("/api/admin/projects", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
 
@@ -126,7 +125,7 @@ export default function ProjectManager() {
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this project?")) return;
-    const res = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
+    const res = await adminFetch(`/api/admin/projects/${id}`, { method: "DELETE" });
     if (res.ok) loadProjects();
     else setError("Delete failed.");
   }
@@ -135,8 +134,7 @@ export default function ProjectManager() {
     <div className="glass-strong rounded-2xl p-6">
       <h2 className="mb-1 text-lg font-semibold text-text">Projects</h2>
       <p className="mb-6 text-sm text-text-muted">
-        Live URL se auto preview aata hai. Agar site nahi hai to cover image upload karein aur GitHub
-        link add karein.
+        Sirf title aur description zaroori hain. Live URL, GitHub, ya cover image optional hain.
       </p>
 
       <form onSubmit={handleSubmit} className="mb-8 grid gap-3 sm:grid-cols-2">
@@ -183,7 +181,7 @@ export default function ProjectManager() {
           <p className="text-xs font-medium text-text-muted">Cover image (optional)</p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
-              placeholder="Image URL or upload below"
+              placeholder="Image URL (optional) or upload below"
               value={form.image}
               onChange={(e) => setForm({ ...form, image: e.target.value })}
               className="min-w-0 flex-1 rounded-xl border border-white/70 bg-white/60 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20"
@@ -221,7 +219,7 @@ export default function ProjectManager() {
             </div>
           )}
           <p className="text-xs text-text-muted">
-            Kam se kam ek cheez zaroori: Live URL, cover image, ya GitHub link.
+            JPG, PNG, WebP ya GIF — max 2 MB. URL paste karna optional hai.
           </p>
         </div>
 
