@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { contactContent, siteConfig } from "@/data/content";
 import SectionReveal from "@/components/ui/SectionReveal";
 import SocialLinks from "@/components/ui/SocialLinks";
-import { useSiteData } from "@/components/providers/SiteDataProvider";
+import { useLiveSiteSettings } from "@/hooks/useLiveSiteData";
 
 type SiteSettings = {
   name: string;
@@ -29,29 +29,13 @@ const defaults: SiteSettings = {
 };
 
 export default function Contact() {
-  const siteData = useSiteData();
-  const [settings, setSettings] = useState<SiteSettings>(
-    siteData?.settings ?? defaults
-  );
+  const settings = useLiveSiteSettings(defaults);
   const [copied, setCopied] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
-  useEffect(() => {
-    if (siteData?.settings) {
-      setSettings({ ...defaults, ...siteData.settings });
-      return;
-    }
-    fetch("/api/site")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.settings) setSettings({ ...defaults, ...d.settings });
-      })
-      .catch(() => {});
-  }, [siteData]);
 
   async function copyEmail() {
     await navigator.clipboard.writeText(settings.email);

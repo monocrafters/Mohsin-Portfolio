@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import type { LinkType } from "@/lib/social-links";
 import type { SocialLinkItem } from "@/components/ui/SocialLinks";
 import { SocialIcon } from "@/components/ui/SocialLinks";
+import { adminFetch } from "@/lib/admin-fetch";
+import { normalizeSocialLinkUrl } from "@/lib/social-link-url";
 
 const LINK_TYPES: { value: LinkType; label: string }[] = [
   { value: "github", label: "GitHub" },
@@ -35,7 +37,7 @@ export default function LinkManager() {
   async function loadLinks() {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/links");
+      const res = await adminFetch("/api/admin/links");
       const data = await res.json();
       if (res.ok) setLinks(data.links || []);
       else setError(data.error || "Failed to load");
@@ -46,7 +48,9 @@ export default function LinkManager() {
     }
   }
 
-  useEffect(() => { loadLinks(); }, []);
+  useEffect(() => {
+    loadLinks();
+  }, []);
 
   function startEdit(link: SocialLinkItem) {
     setEditId(link.id);
@@ -63,17 +67,20 @@ export default function LinkManager() {
     setError("");
     setSaving(true);
 
+    const payload = {
+      ...form,
+      url: normalizeSocialLinkUrl(form.url, form.type),
+    };
+
     try {
       const res = editId
-        ? await fetch(`/api/admin/links/${editId}`, {
+        ? await adminFetch(`/api/admin/links/${editId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form),
+            body: JSON.stringify(payload),
           })
-        : await fetch("/api/admin/links", {
+        : await adminFetch("/api/admin/links", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form),
+            body: JSON.stringify(payload),
           });
 
       const data = await res.json();
@@ -93,9 +100,20 @@ export default function LinkManager() {
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this link?")) return;
-    const res = await fetch(`/api/admin/links/${id}`, { method: "DELETE" });
-    if (res.ok) loadLinks();
-    else setError("Delete failed.");
+    setError("");
+
+    try {
+      const res = await adminFetch(`/api/admin/links/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Delete failed.");
+        return;
+      }
+      if (editId === id) cancelEdit();
+      await loadLinks();
+    } catch {
+      setError("Delete failed.");
+    }
   }
 
   return (
@@ -119,11 +137,13 @@ export default function LinkManager() {
           className="rounded-xl border border-white/70 bg-white/60 px-4 py-2.5 text-sm outline-none"
         >
           {LINK_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>{t.label}</option>
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
           ))}
         </select>
         <input
-          placeholder="URL"
+          placeholder="URL or email"
           value={form.url}
           onChange={(e) => setForm({ ...form, url: e.target.value })}
           className="rounded-xl border border-white/70 bg-white/60 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20 sm:col-span-2"
@@ -138,7 +158,11 @@ export default function LinkManager() {
             {saving ? "Saving..." : editId ? "Update Link" : "+ Add Link"}
           </button>
           {editId && (
-            <button type="button" onClick={cancelEdit} className="rounded-xl border border-white/70 px-4 py-2.5 text-sm text-text-secondary">
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="rounded-xl border border-white/70 px-4 py-2.5 text-sm text-text-secondary"
+            >
               Cancel
             </button>
           )}
@@ -152,19 +176,32 @@ export default function LinkManager() {
       ) : (
         <ul className="space-y-2">
           {links.map((link) => (
-            <li key={link.id} className="flex items-center justify-between gap-3 rounded-xl border border-white/60 bg-white/40 px-4 py-3">
+            <li
+              key={link.id}
+              className="flex items-center justify-between gap-3 rounded-xl border border-white/60 bg-white/40 px-4 py-3"
+            >
               <div className="flex min-w-0 items-center gap-3">
-                <span className="text-text-muted"><SocialIcon type={link.type} /></span>
+                <span className="text-text-muted">
+                  <SocialIcon type={link.type} />
+                </span>
                 <div className="min-w-0">
                   <p className="truncate font-medium text-text">{link.label}</p>
                   <p className="truncate text-xs text-text-muted">{link.url}</p>
                 </div>
               </div>
               <div className="flex shrink-0 gap-2">
-                <button type="button" onClick={() => startEdit(link)} className="text-xs font-medium text-primary hover:underline">
+                <button
+                  type="button"
+                  onClick={() => startEdit(link)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
                   Edit
                 </button>
-                <button type="button" onClick={() => handleDelete(link.id)} className="text-xs font-medium text-red-600 hover:underline">
+                <button
+                  type="button"
+                  onClick={() => handleDelete(link.id)}
+                  className="text-xs font-medium text-red-600 hover:underline"
+                >
                   Delete
                 </button>
               </div>

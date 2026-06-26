@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { heroContent, siteConfig } from "@/data/content";
+import { heroContent, siteConfig, contactContent } from "@/data/content";
 import HeroBlob from "@/components/ui/HeroBlob";
 import RoleRotator from "@/components/ui/RoleRotator";
 import SocialLinks from "@/components/ui/SocialLinks";
+import { useLiveSiteSettings } from "@/hooks/useLiveSiteData";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -17,6 +18,17 @@ const fadeUp = {
 };
 
 export default function Hero() {
+  const settings = useLiveSiteSettings({
+    name: siteConfig.name,
+    title: siteConfig.title,
+    email: siteConfig.email,
+    location: siteConfig.location,
+    available: siteConfig.available,
+    contactLabel: contactContent.label,
+    contactTitle: contactContent.title,
+    contactDescription: contactContent.description,
+  });
+
   return (
     <section id="home" className="relative flex min-h-[100dvh] items-center section-padding">
       <div className="mx-auto w-full max-w-6xl">
@@ -76,12 +88,12 @@ export default function Hero() {
 
             <motion.div custom={5} variants={fadeUp} className="mt-8 flex flex-wrap items-center gap-4">
               <SocialLinks variant="icons" />
-              <span className="text-sm text-text-muted">{siteConfig.location}</span>
+              <span className="text-sm text-text-muted">{settings.location}</span>
             </motion.div>
           </motion.div>
 
           <div className="order-1 mb-2 flex justify-center sm:mb-0 lg:order-2">
-            <HeroBlob src={siteConfig.profileImage} alt={siteConfig.name} />
+            <HeroBlob src={siteConfig.profileImage} alt={settings.name} />
           </div>
         </div>
       </div>

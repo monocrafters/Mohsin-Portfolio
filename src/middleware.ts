@@ -39,10 +39,8 @@ function applyCors(request: NextRequest, response: NextResponse) {
   const allowed = isOriginAllowed(origin, configured);
 
   if (allowed) {
-    response.headers.set(
-      "Access-Control-Allow-Origin",
-      configured.includes("*") ? "*" : origin
-    );
+    // Never use * with credentials — breaks mobile browsers
+    response.headers.set("Access-Control-Allow-Origin", origin);
     response.headers.set("Access-Control-Allow-Credentials", "true");
     response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
     response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");

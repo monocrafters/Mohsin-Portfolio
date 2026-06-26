@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { contactContent, siteConfig } from "@/data/content";
+import { adminFetch } from "@/lib/admin-fetch";
 
 type SiteForm = {
   name: string;
@@ -36,7 +37,7 @@ export default function SiteInfoManager() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/site");
+      const res = await adminFetch("/api/admin/site");
       const data = await res.json();
       if (res.ok && data.settings) setForm({ ...defaults, ...data.settings });
       else setError(data.error || "Failed to load site info.");
@@ -62,9 +63,8 @@ export default function SiteInfoManager() {
     setSuccess("");
 
     try {
-      const res = await fetch("/api/admin/site", {
+      const res = await adminFetch("/api/admin/site", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       const data = await res.json();

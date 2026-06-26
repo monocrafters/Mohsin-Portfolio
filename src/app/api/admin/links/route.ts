@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/auth";
 import { createLink, getAllLinks, type LinkType } from "@/lib/social-links";
+import { normalizeSocialLinkUrl } from "@/lib/social-link-url";
+
+export const dynamic = "force-dynamic";
 
 const VALID_TYPES: LinkType[] = [
   "github", "linkedin", "instagram", "twitter",
@@ -36,7 +39,7 @@ export async function POST(request: Request) {
 
     const link = await createLink({
       label,
-      url,
+      url: normalizeSocialLinkUrl(url, type),
       type,
       order: Number(body.order) || 0,
     });

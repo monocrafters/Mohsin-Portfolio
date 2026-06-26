@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { navLinks, siteConfig } from "@/data/content";
+import { navLinks, siteConfig, contactContent } from "@/data/content";
 import NavIcon from "@/components/ui/NavIcon";
 import HamburgerButton from "@/components/layout/HamburgerButton";
 import SidebarSocialLinks from "@/components/layout/SidebarSocialLinks";
-import { useSiteData } from "@/components/providers/SiteDataProvider";
+import { useLiveSiteSettings } from "@/hooks/useLiveSiteData";
 import { motion, AnimatePresence } from "framer-motion";
 
 const SCROLL_OFFSET = 140;
@@ -33,15 +33,18 @@ function resolveActiveSection(): string {
 }
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const siteData = useSiteData();
+  const settings = useLiveSiteSettings({
+    name: siteConfig.name,
+    title: siteConfig.title,
+    email: siteConfig.email,
+    location: siteConfig.location,
+    available: siteConfig.available,
+    contactLabel: contactContent.label,
+    contactTitle: contactContent.title,
+    contactDescription: contactContent.description,
+  });
   const [activeHref, setActiveHref] = useState("#home");
-  const [available, setAvailable] = useState(siteData?.settings.available ?? siteConfig.available);
-
-  useEffect(() => {
-    if (siteData?.settings?.available !== undefined) {
-      setAvailable(siteData.settings.available);
-    }
-  }, [siteData]);
+  const displayName = settings.name.split(" ")[0] || siteConfig.name.split(" ")[0];
 
   useEffect(() => {
     function syncActive() {
@@ -73,7 +76,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             MA
           </div>
           <div>
-            <p className="text-sm font-semibold text-text">{siteConfig.name.split(" ")[0]}</p>
+            <p className="text-sm font-semibold text-text">{displayName}</p>
             <p className="text-xs text-text-muted">Portfolio</p>
           </div>
         </Link>
@@ -127,7 +130,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="mt-auto space-y-4 pt-5">
         <SidebarSocialLinks />
-        {available && (
+        {settings.available && (
           <div className="border-t border-white/50 pt-4">
             <div className="glass rounded-xl px-4 py-3">
               <div className="flex items-center gap-2">
@@ -148,6 +151,17 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
+  const settings = useLiveSiteSettings({
+    name: siteConfig.name,
+    title: siteConfig.title,
+    email: siteConfig.email,
+    location: siteConfig.location,
+    available: siteConfig.available,
+    contactLabel: contactContent.label,
+    contactTitle: contactContent.title,
+    contactDescription: contactContent.description,
+  });
+  const displayName = settings.name.split(" ")[0] || siteConfig.name.split(" ")[0];
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -176,7 +190,7 @@ export default function Sidebar() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light text-xs font-bold text-white shadow-md">
             MA
           </div>
-          <span className="text-sm font-semibold text-text">Mohsin</span>
+          <span className="text-sm font-semibold text-text">{displayName}</span>
         </Link>
         <HamburgerButton open={mobileOpen} onClick={() => setMobileOpen((v) => !v)} />
       </header>

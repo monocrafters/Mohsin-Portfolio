@@ -1,5 +1,7 @@
-import { ObjectId, type WithId } from "mongodb";
+import { type WithId } from "mongodb";
 import { getDb, isMongoConnectionError } from "@/lib/mongodb";
+import { parseObjectId } from "@/lib/object-id";
+import { normalizeSocialLinkUrl } from "@/lib/social-link-url";
 
 export type LinkType =
   | "github"
@@ -75,6 +77,7 @@ export async function createLink(data: Omit<SocialLink, "createdAt">) {
   const db = await getDb();
   const result = await db.collection<SocialLink>("social_links").insertOne({
     ...data,
+    url: normalizeSocialLinkUrl(data.url, data.type),
     createdAt: new Date(),
   });
   const doc = await db.collection<SocialLink>("social_links").findOne({ _id: result.insertedId });
@@ -83,10 +86,18 @@ export async function createLink(data: Omit<SocialLink, "createdAt">) {
 }
 
 export async function updateLink(id: string, data: Partial<Omit<SocialLink, "createdAt">>) {
+  const objectId = parseObjectId(id);
+  if (!objectId) throw new Error("Invalid link id");
+
+  const update = { ...data };
+  if (update.url !== undefined) {
+    update.url = normalizeSocialLinkUrl(String(update.url), (update.type as LinkType) || "other");
+  }
+
   const db = await getDb();
   const result = await db.collection<SocialLink>("social_links").findOneAndUpdate(
-    { _id: new ObjectId(id) },
-    { $set: data },
+    { _id: objectId },
+    { $set: update },
     { returnDocument: "after" }
   );
   if (!result) throw new Error("Link not found");
@@ -94,7 +105,10 @@ export async function updateLink(id: string, data: Partial<Omit<SocialLink, "cre
 }
 
 export async function deleteLink(id: string) {
+  const objectId = parseObjectId(id);
+  if (!objectId) throw new Error("Invalid link id");
+
   const db = await getDb();
-  const result = await db.collection<SocialLink>("social_links").deleteOne({ _id: new ObjectId(id) });
+  const result = await db.collection<SocialLink>("social_links").deleteOne({ _id: objectId });
   return result.deletedCount === 1;
 }

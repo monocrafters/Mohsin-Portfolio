@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/auth";
 import { getSiteSettings, toPublicSettings, updateSiteSettings } from "@/lib/site-settings";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const session = await requireAdminSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

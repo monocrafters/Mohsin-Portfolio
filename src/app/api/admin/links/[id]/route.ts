@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/auth";
 import { deleteLink, updateLink, type LinkType } from "@/lib/social-links";
+import { normalizeSocialLinkUrl } from "@/lib/social-link-url";
+
+export const dynamic = "force-dynamic";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -19,7 +22,10 @@ export async function PUT(request: Request, context: RouteContext) {
     const update: Record<string, unknown> = {};
 
     if (body.label !== undefined) update.label = String(body.label).trim();
-    if (body.url !== undefined) update.url = String(body.url).trim();
+    if (body.url !== undefined) {
+      const type = VALID_TYPES.includes(body.type) ? body.type : "other";
+      update.url = normalizeSocialLinkUrl(String(body.url).trim(), type);
+    }
     if (body.type !== undefined && VALID_TYPES.includes(body.type)) update.type = body.type;
     if (body.order !== undefined) update.order = Number(body.order);
 
@@ -27,7 +33,9 @@ export async function PUT(request: Request, context: RouteContext) {
     return NextResponse.json({ link });
   } catch (error) {
     console.error("Update link error:", error);
-    return NextResponse.json({ error: "Failed to update link." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to update link.";
+    const status = message === "Invalid link id" || message === "Link not found" ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }
 
@@ -42,6 +50,8 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete link error:", error);
-    return NextResponse.json({ error: "Failed to delete link." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to delete link.";
+    const status = message === "Invalid link id" ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

@@ -4,6 +4,9 @@ import { getSiteSettings, toPublicSettings } from "@/lib/site-settings";
 import { getPageContent, toPublicContent } from "@/lib/content-settings";
 import { contactContent, siteConfig, aboutContent, skillGroups } from "@/data/content";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const fallbackSettings = {
   name: siteConfig.name,
   title: siteConfig.title,

@@ -3,11 +3,10 @@
 import Link from "next/link";
 import type { SocialLinkItem } from "@/components/ui/SocialLinks";
 import { SocialIcon } from "@/components/ui/SocialLinks";
-import { useSiteData } from "@/components/providers/SiteDataProvider";
+import { useLiveSocialLinks } from "@/hooks/useLiveSiteData";
 
 export default function SidebarSocialLinks() {
-  const siteData = useSiteData();
-  const links = (siteData?.links ?? []).slice(0, 4);
+  const links = useLiveSocialLinks().slice(0, 4);
 
   if (links.length === 0) return null;
 

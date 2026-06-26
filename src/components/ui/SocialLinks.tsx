@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { LinkType } from "@/lib/social-links";
-import { useSiteData } from "@/components/providers/SiteDataProvider";
+import { useLiveSocialLinks } from "@/hooks/useLiveSiteData";
 
 export type SocialLinkItem = {
   id: string;
@@ -54,19 +53,7 @@ type SocialLinksProps = {
 };
 
 export default function SocialLinks({ variant = "buttons" }: SocialLinksProps) {
-  const siteData = useSiteData();
-  const [links, setLinks] = useState<SocialLinkItem[]>(siteData?.links ?? []);
-
-  useEffect(() => {
-    if (siteData?.links?.length) {
-      setLinks(siteData.links);
-      return;
-    }
-    fetch("/api/links")
-      .then((r) => r.json())
-      .then((d) => setLinks(d.links || []))
-      .catch(() => setLinks([]));
-  }, [siteData]);
+  const links = useLiveSocialLinks();
 
   if (links.length === 0) return null;
 
